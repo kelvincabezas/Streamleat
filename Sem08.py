@@ -1,64 +1,58 @@
 import streamlit as st
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 import plotly.express as px
 
-#Titulo al app
+# Título de la app
 st.title("K-Means Clustering con Streamlit")
 
-#subir archivo excel
-uploaded_file = st.file_uploader("subir un archivo excel",type=["xlsx"])
+# Subir archivo de Excel
+uploaded_file = st.file_uploader("Sube un archivo Excel", type=["xlsx"])
 
-if uploaded_file is not None:
-    #Leer archivo
-    pd=pd.read_excel(uploaded_file)
+if uploaded_file is not None: 
+    df = pd.read_excel(uploaded_file)
 
-    st.write("### vista previa de los datos")
+    st.write("### Vista previa de los datos")
     st.write(df.head())
 
-    #seleccionar columnas categoricas
-    categoria_columns = df.select_dtypes(include=['object']).columns.tolist()
+    # Seleccionar columnas categóricas
+    categorical_columns = df.select_dtypes(include=['object']).columns.tolist()
+    
+    if categorical_columns:
+        st.write("### Columnas categóricas identificadas")
+        st.write(categorical_columns)
 
-    if categoria_columns:
-        st.wirte("### columnas categoricas identificadas")
-        st.write(categoria_columns)
-
-        #convertir columnas categorixa a dumies
-        df=pd.get_dumies(df,columns=categoria_columns)
-        sr.write("### Datos despues de la conversion  a dumies")
+        # Convertir columnas categóricas a dummies
+        df = pd.get_dummies(df, columns=categorical_columns)
+        st.write("### Datos después de la conversión a dummies")
         st.write(df.head())
     else:
-        st.write("no se encontraron columnas en los datos")
+        st.write("No se encontraron columnas categóricas en los datos.")
 
-#Normalizar los datos
+    # Normalización de datos
+    scaler = StandardScaler()
+    df_scaled = scaler.fit_transform(df)
 
-scaler = StandardScaler()
-df_scaled = scaler.fit_transform(df)
+    # Selección del número de clusters
+    st.write("### Selecciona el número de clusters")
+    num_clusters = st.slider("Número de clusters", min_value=2, max_value=10, value=3)
 
-#Seleccion del numero de cluster
-st.write("### selecciona el numero de  clusters")
-num_clusters = st.slider("Numero de cluster ",min_value = 2 , max_value = 10 ,value =3)
+    # Aplicar K-Means
+    kmeans = KMeans(n_clusters=num_clusters, random_state=42)
+    clusters = kmeans.fit_predict(df_scaled)
 
-#aplicando el k-means
-KMeans=KMeans(num_clusters= num_clusters , random_state= 42)
-clusters = KMeans.fit_predict(df_scaled)
+    # Añadir cluster al DataFrame original
+    df['Cluster'] = clusters
 
-# anadir cluster al DF original
-df['cluster'] = clusters
+    st.write("### Datos con el cluster asignado")
+    st.write(df.head())
 
-st.write("### Datos con el cluster asignado")
-st.write(df.head())
-
-#Visualizacion de los cluster (solo si tiene dos dimensiones)
-if df_scaled.shape[1]>= 2 :
-    df_plot = pd.DataFrame(df_scaled, columns=[f'PC{i+1}'for i in range(df_scaled.shape[1])])
-    df_plot['cluster'] = clusters
-    fig = px.scatter(df_plot , x = 'PC1' , y='PC2' , color = 'Cluster',title = 'Visualizacion de cluster')
-    st.plotly_chart(fig)
-else:
-    st.write("los datos deben tener al menos 2 columnas numericas para visualziar los cluster")
-
-
-
+    # Visualización de los clusters (solo si hay dos dimensiones)
+    if df_scaled.shape[1] >= 2:
+        df_plot = pd.DataFrame(df_scaled, columns=[f'PC{i+1}'for i in range(df_scaled.shape[1])])
+        df_plot['Cluster'] = clusters
+        fig = px.scatter(df_plot, x='PC1', y='PC2', color='Cluster', title='Visualización de Clusters')
+        st.plotly_chart(fig)
+    else:
+        st.write("Los datos deben tener al menos 2 columnas numéricas para visualizar los clusters.")
