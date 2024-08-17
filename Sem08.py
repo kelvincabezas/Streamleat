@@ -13,4 +13,20 @@ if uploaded_file isnotNone:
 
     st.write("### vista previa de los datos")
     st.write(df.head())
-    
+
+    #seleccionar columnas categoricas
+    categoria_columns = df.select_dtypes(include=['object']).columns.tolist()
+
+    if categoria_columns:
+        st.wirte("### columnas categoricas identificadas")
+        st.write(categoria_columns)
+
+        #convertir columnas categorixa a dumies
+        df=pd.get_dumies(df,columns=categoria_columns)
+        sr.write("### Datos despues de la conversion  a dumies")
+        st.write(df.head())
+    else:
+        st.write("no se encontraron columnas en los datos")
+
+
+
