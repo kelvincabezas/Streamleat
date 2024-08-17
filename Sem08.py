@@ -43,5 +43,22 @@ num_clusters = st.slider("Numero de cluster ",min_value = 2 , max_value = 10 ,va
 
 #aplicando el k-means
 KMeans=KMeans(num_clusters= num_clusters , random_state= 42)
-num_clusters = KMeans.fit_predict(df_scaled)
+clusters = KMeans.fit_predict(df_scaled)
+
+# anadir cluster al DF original
+df['cluster'] = clusters
+
+st.write("### Datos con el cluster asignado")
+st.write(df.head())
+
+#Visualizacion de los cluster (solo si tiene dos dimensiones)
+if df_scaled.shape[1]>= 2 :
+    df_plot = pd.DataFrame(df_scaled,columns=[f'PC{i+1}'for i inrange(df_scaled.shape[1])])
+    df_plot['cluster'] = clusters
+    fig = px.scatter(df_plot , x = 'PC1' , y='PC2' , color = 'Cluster',title = 'Visualizacion de cluster')
+    st.plotly_chart(fig)
+else:
+    st.write("los datos deben tener al menos 2 columnas numericas para visualziar los cluster")
+
+
 
