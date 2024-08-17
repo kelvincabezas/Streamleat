@@ -7,7 +7,7 @@ st.title("K-Means Clustering con Streamlit")
 #subir archivo excel
 uploaded_file = st.file_uploader("subir un archivo excel",type=["xlsx"])
 
-if uploaded_file isnotNone:
+if uploaded_file is not None:
     #Leer archivo
     pd=pd.read_excel(uploaded_file)
 
